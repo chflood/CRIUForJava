@@ -1,0 +1,37 @@
+This is demo code to show how to use CRIU (Checkpoint Restore In Userspace) from Java.
+
+It's very much a prototype.  There are many caveats in this file.  Please try it and let me know how it goes.
+chf@redhat.com
+
+Make sure criu is running from the directory that has the socket file.
+[cflood@cflood FromInsideJava]$ sudo /home/cflood/criu/criu-latest/criu/criu service
+Warn  (criu/cr-service.c:1160): Binding to local dir address!
+
+Make sure kernel is compiled with CR turned on
+sudo grep CHECKPOINT /boot/config-*
+
+javac CheckpointRestore.java
+
+javah CheckpointRestore
+
+mv CheckpointRestore.h CheckpointRestore.hpp
+
+Make sure criu is installed and libcriu is on your library path.  I set mine via
+export LOAD_LIBRARY_PATH=/usr/lib64:./
+There is probably a better way
+
+Build the criu library.
+gcc -shared -fPIC  -I/usr/lib/jvm/java-openjdk/include -I/usr/lib/jvm/java-openjdk/include/linux -I/usr/lib64/  -I/usr/include/criu -lcriu -o libCheckpointRestore.so CheckpointRestore.cpp
+
+There is currently a problem with a socket file which is causing tests to fail.  The short term fix is to delete this file.
+I did rm -rf rm -f /var/lib/sss/pipes/nss
+I'm working on addressing this problem.
+
+You can now checkpoint java code:
+sudo setsid java -XX:+UseSerialGC -XX:-UsePerfData -Djava.library.path=$LOAD_LIBRARY_PATH TestRandom 1000000 1000
+
+and restore:
+
+sudo bash
+cd /home/chf/SavedWorlds/run<x>
+criu restore --shell-job

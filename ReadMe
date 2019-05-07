@@ -4,7 +4,7 @@ It's very much a prototype.  There are many caveats in this file.  Please try it
 chf@redhat.com
 
 Make sure criu is running from the directory that has the socket file.
-[cflood@cflood FromInsideJava]$ sudo /home/cflood/criu/criu-latest/criu/criu service
+[cflood@cflood FromInsideJava]$ sudo criu service
 Warn  (criu/cr-service.c:1160): Binding to local dir address!
 
 Make sure kernel is compiled with CR turned on

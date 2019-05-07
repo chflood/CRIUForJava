@@ -1,37 +1,51 @@
 This is demo code to show how to use CRIU (Checkpoint Restore In Userspace) from Java.
 
 It's very much a prototype.  There are many caveats in this file.  Please try it and let me know how it goes.
-chf@redhat.com
 
-Make sure criu is running from the directory that has the socket file.
-[cflood@cflood FromInsideJava]$ sudo criu service&
-Warn  (criu/cr-service.c:1160): Binding to local dir address!
-
-Make sure kernel is compiled with CR turned on
+1) Make sure CRIU is enabled in your kernel 
 sudo grep CHECKPOINT /boot/config-*
 
+2) Make sure you are running criu version 3.11 or higher
+
+3) Make sure criu service is running (socket create) in the same directory as your socket file.
+sudo criu service&
+Warn  (criu/cr-service.c:1160): Binding to local dir address!
+
+4) One last check
+sudo criu check
+
+5) Compile the java file
 javac CheckpointRestore.java
 
+6) Generate the .h file
 javah CheckpointRestore
 
+7) Make it into a .hpp file
 mv CheckpointRestore.h CheckpointRestore.hpp
 
-Make sure criu is installed and libcriu is on your library path.  I set mine via
+8) Make sure criu is installed and libcriu is on your library path.  I set mine via
 export LOAD_LIBRARY_PATH=/usr/lib64:./
 There is probably a better way
 
-Build the criu library.
+9) Build the criu library.
 gcc -shared -fPIC  -I/usr/lib/jvm/java-openjdk/include -I/usr/lib/jvm/java-openjdk/include/linux -I/usr/lib64/  -I/usr/include/criu -lcriu -o libCheckpointRestore.so CheckpointRestore.cpp
+
+10) You can now checkpoint java code:
+sudo setsid java -XX:+UseSerialGC -XX:-UsePerfData -Djava.library.path=$LOAD_LIBRARY_PATH TestRandom 1000000 1000
+
+11) And restore
+sudo bash
+cd /home/chf/SavedWorlds/run<x>
+criu restore --shell-job
+
+
+Known Issues:
 
 There is currently a problem with a socket file which is causing tests to fail.  The short term fix is to delete this file.
 I did rm -rf rm -f /var/lib/sss/pipes/nss
 I'm working on addressing this problem.
 
-You can now checkpoint java code:
-sudo setsid java -XX:+UseSerialGC -XX:-UsePerfData -Djava.library.path=$LOAD_LIBRARY_PATH TestRandom 1000000 1000
+Saving Performance Data causes the generation of open files which can't be closed.
 
-and restore:
+ParallelGC causes an issue.
 
-sudo bash
-cd /home/chf/SavedWorlds/run<x>
-criu restore --shell-job

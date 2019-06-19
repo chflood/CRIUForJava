@@ -1,0 +1,59 @@
+
+
+
+Tasks:
+
+Demo programs:
+   Elastic Search
+   Serverless
+      
+
+Features:
+
+   Java API:
+      Check() => Verify that Checkpointing is enabled in your kernel and working properly.
+                 Check to see if your current JVM has any issues (open sockets etc).
+
+      Save() => Runs Hooks, Runs CRIU dump.
+
+      SaveIncremental() => Saves just the changes since the last Save()/SaveIncremental().
+
+      Restore() => Restores a saved Image using CRIU restore.
+
+      AddCheckpointHook(Hook h) => run h  method at checkpoint.
+
+      AddRestoreHook(Hook h)  => run h method at restore.
+
+
+Tasks:
+
+      Figure out if Hooks are interfaces or Lambdas.
+      
+      Implement System Hooks:
+
+	        GC/shrink the heap and then reinflating it.
+		Shutdown workstealing thread pools and re-establish with an appropriate number of threads based on number of available processors.
+
+      Implement User example hooks:
+		Clear certificates and then re-establish them
+	        Clearing connections and then restoring them.		
+
+      Hot Swapping Garbage Collection Algorithms just before checkpointing.  Warmup and rampup with ParallelGC, checkpoint/restore with epsilon. Give memory for card tables etc back before checkpoint.
+
+      Optimize heap layout.  Use hardware monitors to determine false cache line sharing and pad data structures before checkpointing.
+
+   
+   
+Bugs/Issues:
+
+   What to do about missing library entries.
+
+   How to accomodate perf
+
+   How to accomodate parallelGC
+
+   What to do about  /var/lib/sss/pipes/nss
+
+
+
+ 

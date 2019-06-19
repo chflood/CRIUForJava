@@ -30,8 +30,7 @@ I'm working on addressing this problem.
 You can now checkpoint java code:
 sudo setsid java -XX:+UseSerialGC -XX:-UsePerfData -Djava.library.path=$LOAD_LIBRARY_PATH TestRandom 1000000 1000
 
-and restore:
+This will print out the restore instructions which you can run as root:
 
-sudo bash
-cd /home/chf/SavedWorlds/run<x>
-criu restore --shell-job
+sudo java -XX:+UseSerialGC -XX:-UsePerfData -Djava.library.path=$LOAD_LIBRARY_PATH  TestRandomRestore <saved world directory>
+

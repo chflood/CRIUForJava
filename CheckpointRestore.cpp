@@ -66,7 +66,7 @@ JNIEXPORT void JNICALL Java_CheckpointRestore_SaveTheWorldNative (JNIEnv * env, 
 	criu_set_ext_unix_sk(true);
 	int ret = criu_dump();
 
-	if (ret == 0) {
+	if (ret >= 0) {
 	  printf("Successful dump\n");
 	} else {
 	  printf("Error from dump %d\n", ret);
@@ -84,7 +84,6 @@ JNIEXPORT void JNICALL Java_CheckpointRestore_SaveTheWorldNative (JNIEnv * env, 
 JNIEXPORT void JNICALL Java_CheckpointRestore_RestoreTheWorldNative
 (JNIEnv * env, jobject jobj, jstring jstr) {
   const char * path = env->GetStringUTFChars(jstr, NULL);  
-  printf("\nRestore The World Path = %s\n",path);
   int fd = open(path, O_DIRECTORY);
 
   if (fd < 0) {
@@ -101,11 +100,11 @@ JNIEXPORT void JNICALL Java_CheckpointRestore_RestoreTheWorldNative
 
   criu_set_shell_job(true);
   criu_set_images_dir_fd(fd);
-  criu_set_log_file((char *) "chfrestore.log");
+  criu_set_log_file((char *) "javarestore.log");
   criu_set_log_level(4);
 
   int pid = criu_restore_child();
-  printf("\npid = %d\n", pid);
+
   if (pid < 0) {
     perror("Criu Restore Bad Pid \n");
   } else {
